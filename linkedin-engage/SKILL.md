@@ -1,9 +1,41 @@
 ---
 name: linkedin-engage
-version: "1.2.0"
+version: "1.2.1"
 remote_url: "https://raw.githubusercontent.com/inn0v8/fuzzy-wuzzy/main/linkedin-engage/SKILL.md"
 description: Monitor Spinwheel's LinkedIn company page AND the founder's personal profile for new posts, draft comments in your personal voice, and post them with one-tap approval. Use this skill whenever someone on the Spinwheel team wants to engage with company or founder LinkedIn posts, boost a post's reach, check what's been posted recently, or stay active on social — even if they just say "check LinkedIn", "like our posts", "comment on Spinwheel's feed", "engage with Tomas's posts", or "what did we post this week". Always trigger this skill for anything touching Spinwheel LinkedIn engagement, amplification, or social media activity.
 ---
+
+                    ░▒▒▓▓▓▓▓▒▒░░░▒▒▓▓▓████████▓▓▓▒▒░                  
+              ░▒▓█████▓▒░░▒▓▓████████████████████████▓▒░             
+           ▒▓███████▒░░▓█████████████████████████████████▓▒          
+        ░▓███████▓░░▒███████████████████████████████████████▓░       
+      ░▓████████░░▒█████████████▓▒░░  ░▒▒▒▒░░░░▒▒▓████████████▓░     
+     ▒████████▒ ▒███████████▓▒░         ▒▓█████▓▓▒░░▓███████████▓    
+   ░▓████████▒ ▓██████████▒                ▒███████▓▒░▒▓██████████░  
+   █████████▒ ▓█████████▓                    ▓████████▒ ▒██████████░ 
+  ▓████████▓ ▒█████████▒                      ▒████████▓░░█████████▓ 
+ ▒█████████░░█████████▒                        ▒█████████ ░█████████▒
+ ▓████████▓ ▒█████████                          █████████▒ ▓████████▓
+ ▓████████▓ ▒█████████                          ▓████████▓ ▓████████▓
+ ▓█████████ ▒█████████                          █████████▒ ▓████████▓
+ ▒█████████▒ ▓████████▒                        ▒█████████░ █████████▒
+  ▓█████████░ ▓████████▒                      ▒█████████▓ ▒████████▓ 
+   ██████████▒ ▒████████▓                    ▓█████████▓ ░█████████░ 
+   ░▓██████████▒░▒▓███████▒                ▒██████████▓ ░█████████░  
+     ▒███████████▓░░▒▓▓█████▓▒░         ▒▓███████████▒ ▒████████▓    
+      ░▓████████████▓▓▒░░░░░▒▒▒░  ░░▒▓▓████████████▓░░▓███████▓░     
+        ░▓███████████████████████████████████████▒░░▓███████▓░       
+           ▒▓█████████████████████████████████▓░░▒▓██████▓▒          
+              ░▒▓█████████████████████████▓▒░░▒▓█████▓▒░             
+                   ░░▒▒▓▓▓███████▓▓▓▒▒░░░░▒▓▓▓▓▒▒▒░                  
+ 
+███████╗██████╗ ██╗███╗   ██╗██╗    ██╗██╗  ██╗███████╗███████╗██╗     
+██╔════╝██╔══██╗██║████╗  ██║██║    ██║██║  ██║██╔════╝██╔════╝██║     
+███████╗██████╔╝██║██╔██╗ ██║██║ █╗ ██║███████║█████╗  █████╗  ██║     
+╚════██║██╔═══╝ ██║██║╚██╗██║██║███╗██║██╔══██║██╔══╝  ██╔══╝  ██║     
+███████║██║     ██║██║ ╚████║╚███╔███╔╝██║  ██║███████╗███████╗███████╗
+╚══════╝╚═╝     ╚═╝╚═╝  ╚═══╝ ╚══╝╚══╝ ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝
+
 
 # LinkedIn Engage — Spinwheel
 
@@ -17,7 +49,7 @@ This skill runs automatically once a day at 4:00pm PT and can be triggered manua
 
 Before doing anything else, check for a newer version:
 
-1. Note the current version from this file's frontmatter: `version: "1.2.0"`
+1. Note the current version from this file's frontmatter: `version: "1.2.1"`
 2. Fetch the remote SKILL.md using WebFetch: `https://raw.githubusercontent.com/inn0v8/fuzzy-wuzzy/main/linkedin-engage/SKILL.md`
 3. Parse the `version:` field from the remote file's frontmatter
 4. Compare: if remote version is higher than local version, run the update:
@@ -35,7 +67,7 @@ Before doing anything else, check for a newer version:
 ## What this skill does
 
 1. Opens Spinwheel's LinkedIn company page in your browser and collects recent posts
-2. Opens the founder's personal LinkedIn profile (if configured) and collects their recent posts
+2. Opens Tomás's personal LinkedIn profile and collects his recent posts
 3. Loads your personal preferences (tone, style, examples)
 4. Filters to posts you haven't engaged with yet
 5. Drafts a comment in your voice for each new post
@@ -69,14 +101,11 @@ Make sure you're **logged into LinkedIn** in Chrome. If not, go to linkedin.com 
     "The loan payoff flow is such a game changer for users. Reducing that friction is exactly what this space needs.",
     "Thrilled to be growing the team — if you're passionate about fintech infrastructure, Spinwheel is a great place to be."
   ],
-  "slack_dm_url": null,
-  "founder_linkedin_url": null
+  "slack_dm_url": null
 }
 ```
 
 `slack_dm_url` is the URL to your Slack DM with yourself (e.g. `https://app.slack.com/client/T5FULLG74/DXXXXXXXXX`). See first-time setup for how to get it. Leave null to receive posts inline in chat instead.
-
-`founder_linkedin_url` is the LinkedIn profile URL of the founder/person whose posts the team should also engage with (e.g. `https://www.linkedin.com/in/yourname/recent-activity/all/`). Set during first-time setup or any time with "add founder profile."
 
 ---
 
@@ -94,17 +123,9 @@ If they want to customize, ask:
 - Any phrases to avoid
 - An example comment they'd actually write
 
-Create `~/spinwheel-linkedin-preferences.json` with their answers (or defaults if skipped). Set `slack_dm_url` and `founder_linkedin_url` to null for now.
+Create `~/spinwheel-linkedin-preferences.json` with their answers (or defaults if skipped). Set `slack_dm_url` to null for now.
 
-### Step 2: Ask about the founder profile
-
-Say: "This skill monitors Spinwheel's company page by default. Should I also engage with a founder or executive's personal LinkedIn posts? If yes, paste their LinkedIn profile URL."
-
-If they provide a URL: save it as `founder_linkedin_url` in the format `https://www.linkedin.com/in/{username}/recent-activity/all/` — replace the profile URL stem with `/recent-activity/all/` to land directly on their posts feed. If the URL they pasted already ends in `/recent-activity/all/` or similar, use it as-is.
-
-If no/skip: leave `founder_linkedin_url` null.
-
-### Step 3: Ask about Slack
+### Step 2: Ask about Slack
 
 Say: "Want me to send you a Slack DM when new posts are ready to review? I'll open Slack in Chrome and message you directly — no setup required as long as you're logged into Slack. Just say yes or no."
 
@@ -122,16 +143,16 @@ If no/skip: leave `slack_dm_url` null — the skill will present posts inline.
 7. Save that URL to `slack_dm_url` in `~/spinwheel-linkedin-preferences.json`.
 8. Say: "Got it! I'll send your daily LinkedIn posts to that Slack DM."
 
-### Step 4: Create the daily scheduled task
+### Step 3: Create the daily scheduled task
 
 Create one recurring scheduled task using the `create_scheduled_task` tool:
 
 - **taskId**: `spinwheel-linkedin-daily`
 - **cronExpression**: `0 16 * * *` (4:00pm daily, local time)
-- **description**: "Daily LinkedIn check — find new Spinwheel and founder posts, draft comments for approval"
+- **description**: "Daily LinkedIn check — find new Spinwheel and Tomás posts, draft comments for approval"
 - **prompt**: [use the full engagement workflow prompt at the bottom of this file]
 
-### Step 5: Run first check immediately
+### Step 4: Run first check immediately
 
 After setup, say: "All set! I'll check LinkedIn every day at 4pm. Let me run the first check now."
 
@@ -173,7 +194,7 @@ Reply with: *A1* to approve, *S2* to skip, *E3: your text* to edit, or *skip all
 [continue for all posts]
 ```
 
-Include the source label ([Spinwheel] or the founder's first name) so it's clear which page each post came from.
+Include the source label ([Spinwheel] or [Tomás]) so it's clear which page each post came from.
 
 After sending, wait for the user's response in chat. They can reply directly in chat (not Slack) — handle their choices the same way as inline approval.
 
@@ -207,17 +228,17 @@ Scroll to load 10–15 recent posts. For each, extract:
 - Reaction and comment counts
 - Source label: `Spinwheel`
 
-### 4. Collect posts — Founder profile (if configured)
-If `founder_linkedin_url` is set in preferences:
+### 4. Collect posts — Founder profile (always)
+Navigate to: `https://www.linkedin.com/in/theinnovativeone/recent-activity/all/`
 
-Navigate to that URL. Screenshot to confirm the page loaded.
+Screenshot to confirm the page loaded.
 
 Scroll to load 10–15 recent posts. For each, extract:
 - Full permalink URL
 - Full post text
 - Post age
 - Reaction and comment counts
-- Source label: use the founder's first name (parse from the page title or profile name)
+- Source label: `Tomás`
 
 If the page fails to load, skip this source and note it in the final summary.
 
@@ -231,7 +252,7 @@ For each new post, write a comment using the loaded preferences — specific to 
 
 Adjust the framing based on source:
 - **Spinwheel company posts**: write as a proud team member amplifying company news
-- **Founder's personal posts**: write as a supportive colleague reacting to their insight or announcement
+- **Tomás's personal posts**: write as a supportive colleague reacting to his insight or announcement
 
 Post type guidance:
 | Post type | Respond to |
@@ -276,17 +297,15 @@ After each successful engagement, add the post URL to `engaged_post_ids` and upd
 
 ### 10. Wrap up
 ```
-✅ Engaged: X posts (Y from Spinwheel, Z from [founder name])
+✅ Engaged: X posts (Y from Spinwheel, Z from Tomás)
 ⏭️ Skipped: N posts
 🔍 Already done: M posts
 ```
 
 ---
 
-## Managing sources any time
+## Managing preferences any time
 
-- **"Add founder profile"** or **"also follow [name]"**: Ask for their LinkedIn URL, save to `founder_linkedin_url` in preferences.
-- **"Remove founder profile"** or **"just Spinwheel"**: Set `founder_linkedin_url` to null.
 - **"Change my tone"** / **"update my style"**: Read preferences, update, write back, confirm.
 - **"Change my Slack"**: Re-run Slack DM setup flow.
 
@@ -296,7 +315,7 @@ After each successful engagement, add the post URL to `engaged_post_ids` and upd
 
 - **CAPTCHA**: Stop, tell user, ask them to complete it manually.
 - **Already liked**: Skip like, still offer to comment if none is there.
-- **Reshared post**: Engage on Spinwheel's (or founder's) version unless it's entirely another company's content.
+- **Reshared post**: Engage on Spinwheel's (or Tomás's) version unless it's entirely another company's content.
 - **Page not loading**: Refresh once; if still failing, skip that source and note it in the summary.
 - **Not logged in to LinkedIn**: Stop and ask user to log into LinkedIn in Chrome first.
 - **Not logged in to Slack**: If Slack DM navigation fails, fall back to inline presentation and note that Slack wasn't reachable.
@@ -311,13 +330,13 @@ After each successful engagement, add the post URL to `engaged_post_ids` and upd
 ```
 You are running the daily Spinwheel LinkedIn engagement routine.
 
-1. Read ~/spinwheel-linkedin-preferences.json for name, tone, style, slack_dm_url, and founder_linkedin_url. Read ~/spinwheel-linkedin-tracker.json for engagement history (create with empty defaults if missing).
+1. Read ~/spinwheel-linkedin-preferences.json for name, tone, style, and slack_dm_url. Read ~/spinwheel-linkedin-tracker.json for engagement history (create with empty defaults if missing).
 2. Open https://www.linkedin.com/company/spinwheelapi/posts/?viewAsMember=true in Chrome. Screenshot to confirm. If login wall appears, stop and notify user. Scroll to collect 10-15 recent posts — for each extract permalink URL (via "Copy link to post" from ... menu), full text, age, engagement counts, and source label "Spinwheel".
-3. If founder_linkedin_url is set: navigate to that URL, collect 10-15 recent posts the same way, label each with the founder's first name.
+3. Navigate to https://www.linkedin.com/in/theinnovativeone/recent-activity/all/ and collect 10-15 recent posts the same way, label each "Tomás". If the page fails to load, skip and note it.
 4. Merge all posts. Skip URLs already in engaged_post_ids. Skip posts older than 30 days. If nothing new, say so and stop.
-5. For each new post, draft a comment in the user's voice — specific to the post, never generic praise. For Spinwheel posts: write as a proud team member. For founder posts: write as a supportive colleague engaging with their idea.
+5. For each new post, draft a comment in the user's voice — specific to the post, never generic praise. For Spinwheel posts: write as a proud team member. For Tomás's posts: write as a supportive colleague engaging with his idea.
 6. If slack_dm_url is set: navigate to that URL in Chrome, click the message input, type a summary of all posts + proposed comments (format: header with count and A1/S2/E3 instructions, then one section per post with source label, excerpt, and proposed comment), press Enter to send. Tell the user in chat the Slack message was sent. If no slack_dm_url: present posts inline one at a time with options A/E/S/Q.
 7. Wait for user's approval choices in chat. On approval: navigate to post permalink, click Like, click comment field, type approved comment, click Post, screenshot to confirm.
 8. After each successful engagement, add post URL to engaged_post_ids and update last_checked in ~/spinwheel-linkedin-tracker.json.
-9. Report: ✅ Engaged: X (Y Spinwheel, Z founder) · ⏭️ Skipped: N · 🔍 Already done: M
+9. Report: ✅ Engaged: X (Y Spinwheel, Z Tomás) · ⏭️ Skipped: N · 🔍 Already done: M
 ```
