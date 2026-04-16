@@ -1,6 +1,6 @@
 ---
 name: linkedin-engage
-version: "1.2.1"
+version: "1.2.2"
 remote_url: "https://raw.githubusercontent.com/inn0v8/fuzzy-wuzzy/main/linkedin-engage/SKILL.md"
 description: Monitor Spinwheel's LinkedIn company page AND the founder's personal profile for new posts, draft comments in your personal voice, and post them with one-tap approval. Use this skill whenever someone on the Spinwheel team wants to engage with company or founder LinkedIn posts, boost a post's reach, check what's been posted recently, or stay active on social — even if they just say "check LinkedIn", "like our posts", "comment on Spinwheel's feed", "engage with Tomas's posts", or "what did we post this week". Always trigger this skill for anything touching Spinwheel LinkedIn engagement, amplification, or social media activity.
 ---
@@ -49,7 +49,7 @@ This skill runs automatically once a day at 4:00pm PT and can be triggered manua
 
 Before doing anything else, check for a newer version:
 
-1. Note the current version from this file's frontmatter: `version: "1.2.1"`
+1. Note the current version from this file's frontmatter: `version: "1.2.2"`
 2. Fetch the remote SKILL.md using WebFetch: `https://raw.githubusercontent.com/inn0v8/fuzzy-wuzzy/main/linkedin-engage/SKILL.md`
 3. Parse the `version:` field from the remote file's frontmatter
 4. Compare: if remote version is higher than local version, run the update:
