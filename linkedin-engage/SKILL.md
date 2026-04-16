@@ -2,7 +2,7 @@
 name: linkedin-engage
 description: Monitor Spinwheel's LinkedIn company page AND the founder's personal profile for new posts, draft comments in your personal voice, and post them with one-tap approval. Use this skill whenever someone on the Spinwheel team wants to engage with company or founder LinkedIn posts, boost a post's reach, check what's been posted recently, or stay active on social — even if they just say "check LinkedIn", "like our posts", "comment on Spinwheel's feed", "engage with Tomas's posts", or "what did we post this week". Always trigger this skill for anything touching Spinwheel LinkedIn engagement, amplification, or social media activity.
 metadata:
-  version: "1.2.6"
+  version: "1.2.7"
   remote_url: "https://raw.githubusercontent.com/inn0v8/fuzzy-wuzzy/main/linkedin-engage/SKILL.md"
 ---
 
@@ -50,7 +50,7 @@ This skill runs automatically once a day at 4:00pm PT and can be triggered manua
 
 Before doing anything else, check for a newer version:
 
-1. Note the current version from this file's frontmatter: `version: "1.2.6"`
+1. Note the current version from this file's frontmatter: `version: "1.2.7"`
 2. Fetch the remote SKILL.md by running this bash command:
    ```bash
    curl -sf "https://raw.githubusercontent.com/inn0v8/fuzzy-wuzzy/main/linkedin-engage/SKILL.md"
@@ -87,18 +87,21 @@ Make sure you're **logged into LinkedIn** in Chrome. If not, go to linkedin.com 
 
 ## Personal config files (local to each user)
 
-Config files are stored inside the skill's own directory — this is the only path that's reliably accessible in any Cowork session or scheduled task context.
+Config files are stored inside the user's Cowork workspace folder — this is the Mac filesystem (persistent across sessions, even as session IDs change).
 
 **On every run, first establish the data directory:**
 ```bash
 SKILL_DIR=$(find / -maxdepth 10 -type f -name "SKILL.md" -path "*/.claude/skills/linkedin-engage/SKILL.md" ! -path "*/worktrees/*" 2>/dev/null | head -1 | xargs dirname 2>/dev/null)
-# Navigate up: linkedin-engage/ -> skills/ -> .claude/ -> workspace root
-WORKSPACE=$(dirname "$(dirname "$(dirname "$SKILL_DIR")")")
+# Navigate up: linkedin-engage/ -> skills/ -> .claude/ -> mnt root
+MNT=$(dirname "$(dirname "$(dirname "$SKILL_DIR")")")
+# Find the workspace folder: first non-hidden, non-system dir in mnt/
+# (e.g. LinkedIn_Routine/ — this is on the Mac filesystem and persists across sessions)
+WORKSPACE=$(find "$MNT" -maxdepth 1 -mindepth 1 -type d ! -name ".*" ! -name "outputs" ! -name "uploads" 2>/dev/null | head -1)
 DATA_DIR="$WORKSPACE/.claude/linkedin-data"
 mkdir -p "$DATA_DIR"
 echo "Data directory: $DATA_DIR"
 ```
-All config files live in `$DATA_DIR`. If `SKILL_DIR` is empty, stop and tell the user the skill isn't installed properly.
+All config files live in `$DATA_DIR` (inside the Cowork workspace folder on your Mac). If `SKILL_DIR` is empty, stop and tell the user the skill isn't installed properly.
 
 ### Tracker — `$DATA_DIR/tracker.json`
 ```json
@@ -341,7 +344,7 @@ After each successful engagement, add the post URL to `engaged_post_ids` and upd
 - **Page not loading**: Refresh once; if still failing, skip that source and note it in the summary.
 - **Not logged in to LinkedIn**: Stop and ask user to log into LinkedIn in Chrome first.
 - **Not logged in to Slack**: If Slack DM navigation fails, fall back to inline presentation and note that Slack wasn't reachable.
-- **Reset tracker**: Delete or clear `spinwheel-linkedin-tracker.json` in your workspace folder to see all recent posts again.
+- **Reset tracker**: Delete or clear `$DATA_DIR/tracker.json` (in your Cowork workspace folder under `.claude/linkedin-data/`) to see all recent posts again.
 
 ---
 
@@ -352,7 +355,7 @@ After each successful engagement, add the post URL to `engaged_post_ids` and upd
 ```
 You are running the daily Spinwheel LinkedIn engagement routine.
 
-1. Establish data directory: run `SKILL_DIR=$(find / -maxdepth 10 -type f -name "SKILL.md" -path "*/.claude/skills/linkedin-engage/SKILL.md" ! -path "*/worktrees/*" 2>/dev/null | head -1 | xargs dirname 2>/dev/null)`, then `WORKSPACE=$(dirname "$(dirname "$(dirname "$SKILL_DIR")")")` and `DATA_DIR="$WORKSPACE/.claude/linkedin-data"`. Read `$DATA_DIR/preferences.json` for name, tone, style, slack_method, and slack_dm_url. Read `$DATA_DIR/tracker.json` for engagement history (create with empty defaults if missing).
+1. Establish data directory: run `SKILL_DIR=$(find / -maxdepth 10 -type f -name "SKILL.md" -path "*/.claude/skills/linkedin-engage/SKILL.md" ! -path "*/worktrees/*" 2>/dev/null | head -1 | xargs dirname 2>/dev/null)`, then `MNT=$(dirname "$(dirname "$(dirname "$SKILL_DIR")")")`, then `WORKSPACE=$(find "$MNT" -maxdepth 1 -mindepth 1 -type d ! -name ".*" ! -name "outputs" ! -name "uploads" 2>/dev/null | head -1)`, then `DATA_DIR="$WORKSPACE/.claude/linkedin-data"` and `mkdir -p "$DATA_DIR"`. Read `$DATA_DIR/preferences.json` for name, tone, style, slack_method, and slack_dm_url. Read `$DATA_DIR/tracker.json` for engagement history (create with empty defaults if missing).
 2. Open https://www.linkedin.com/company/spinwheelapi/posts/?viewAsMember=true in Chrome. Screenshot to confirm. If login wall appears, stop and notify user. Scroll to collect 1-5 recent posts — for each extract permalink URL (via "Copy link to post" from ... menu), full text, age, engagement counts, and source label "Spinwheel".
 3. Navigate to https://www.linkedin.com/in/theinnovativeone/recent-activity/all/ and collect 1-5 recent posts the same way, label each "Tomás". If the page fails to load, skip and note it.
 4. Merge all posts. Skip URLs already in engaged_post_ids. Skip posts older than 7 days. If nothing new, say so and stop.
