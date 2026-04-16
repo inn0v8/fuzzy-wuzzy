@@ -1,0 +1,13 @@
+# Versioned skill snapshots
+*.skill
+
+# Local state files
+spinwheel-linkedin-tracker.json
+spinwheel-linkedin-preferences.json
+
+# Session logs and HTML reports (root level only)
+/*.md
+*.html
+
+# Misc
+zinoiSBv
