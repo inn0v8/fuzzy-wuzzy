@@ -2,7 +2,7 @@
 name: linkedin-engage
 description: Monitor Spinwheel's LinkedIn company page AND the founder's personal profile for new posts, draft comments in your personal voice, and post them with one-tap approval. Use this skill whenever someone on the Spinwheel team wants to engage with company or founder LinkedIn posts, boost a post's reach, check what's been posted recently, or stay active on social — even if they just say "check LinkedIn", "like our posts", "comment on Spinwheel's feed", "engage with Tomas's posts", or "what did we post this week". Always trigger this skill for anything touching Spinwheel LinkedIn engagement, amplification, or social media activity.
 metadata:
-  version: "1.2.4"
+  version: "1.2.5"
   remote_url: "https://raw.githubusercontent.com/inn0v8/fuzzy-wuzzy/main/linkedin-engage/SKILL.md"
 ---
 
@@ -50,7 +50,7 @@ This skill runs automatically once a day at 4:00pm PT and can be triggered manua
 
 Before doing anything else, check for a newer version:
 
-1. Note the current version from this file's frontmatter: `version: "1.2.4"`
+1. Note the current version from this file's frontmatter: `version: "1.2.5"`
 2. Fetch the remote SKILL.md by running this bash command:
    ```bash
    curl -sf "https://raw.githubusercontent.com/inn0v8/fuzzy-wuzzy/main/linkedin-engage/SKILL.md"
@@ -59,7 +59,7 @@ Before doing anything else, check for a newer version:
 4. Compare: if remote version is higher than local version, run the update:
    a. Find this skill file on disk:
       ```bash
-      find ~ -path "*/linkedin-engage/SKILL.md" ! -path "*/outputs/*" ! -path "*/tmp/*" 2>/dev/null | head -1
+      find / -maxdepth 10 -type f -name "SKILL.md" -path "*/.claude/skills/linkedin-engage/SKILL.md" ! -path "*/worktrees/*" 2>/dev/null | head -1
       ```
    b. Write the full remote content to that path (overwrite completely)
    c. Tell the user: "⬆️ Updated linkedin-engage from v{local} → v{remote}. Running with the new version."
@@ -87,18 +87,25 @@ Make sure you're **logged into LinkedIn** in Chrome. If not, go to linkedin.com 
 
 ## Personal config files (local to each user)
 
-Config files live in your **workspace folder** (the folder you've selected in Cowork), not in `~/`. On every run, find the right path with:
-```bash
-find /sessions/*/mnt -maxdepth 3 -name "spinwheel-linkedin-preferences.json" 2>/dev/null | head -1
-```
-If that returns a path, use its parent directory for all config files. If it returns nothing, this is a first-time install — find the workspace folder with `ls /sessions/*/mnt/ 2>/dev/null` and save config there.
+Config files are stored inside the skill's own directory — this is the only path that's reliably accessible in any Cowork session or scheduled task context.
 
-### Tracker — `spinwheel-linkedin-tracker.json` (in workspace folder)
+**On every run, first establish the data directory:**
+```bash
+SKILL_DIR=$(find / -maxdepth 10 -type f -name "SKILL.md" -path "*/.claude/skills/linkedin-engage/SKILL.md" ! -path "*/worktrees/*" 2>/dev/null | head -1 | xargs dirname 2>/dev/null)
+# Navigate up: linkedin-engage/ -> skills/ -> .claude/ -> workspace root
+WORKSPACE=$(dirname "$(dirname "$(dirname "$SKILL_DIR")")")
+DATA_DIR="$WORKSPACE/.claude/linkedin-data"
+mkdir -p "$DATA_DIR"
+echo "Data directory: $DATA_DIR"
+```
+All config files live in `$DATA_DIR`. If `SKILL_DIR` is empty, stop and tell the user the skill isn't installed properly.
+
+### Tracker — `$DATA_DIR/tracker.json`
 ```json
 { "engaged_post_ids": [], "last_checked": null }
 ```
 
-### Preferences — `spinwheel-linkedin-preferences.json` (in workspace folder)
+### Preferences — `$DATA_DIR/preferences.json`
 ```json
 {
   "name": "Your Name",
@@ -121,11 +128,9 @@ If that returns a path, use its parent directory for all config files. If it ret
 
 ## First-time setup (run once on first install)
 
-Detect first-time install by running:
-```bash
-find /sessions/*/mnt -maxdepth 3 -name "spinwheel-linkedin-preferences.json" 2>/dev/null | head -1
-```
-If this returns nothing — and `~/spinwheel-linkedin-preferences.json` also doesn't exist — this is a first-time install.
+After establishing `DATA_DIR` (see above), detect first-time install by checking whether `$DATA_DIR/preferences.json` exists. If it does not exist, this is a first-time install.
+
+**Migration:** If `$DATA_DIR/preferences.json` doesn't exist but a `spinwheel-linkedin-preferences.json` file is found elsewhere (e.g. a previous install), copy it to `$DATA_DIR/preferences.json` and use that — no need to re-run setup.
 
 ### Step 1: Greet and personalize
 
@@ -137,7 +142,7 @@ If they want to customize, ask:
 - Any phrases to avoid
 - An example comment they'd actually write
 
-Find the workspace folder (`ls /sessions/*/mnt/ 2>/dev/null`), then create `spinwheel-linkedin-preferences.json` there with their answers (or defaults if skipped). Set `slack_dm_url` to null for now.
+Create `$DATA_DIR/preferences.json` with their answers (or defaults if skipped). Set `slack_dm_url` to null for now.
 
 ### Step 2: Ask about Slack
 
@@ -154,7 +159,7 @@ If no/skip: leave `slack_dm_url` null — the skill will present posts inline.
 4. Type the user's name (from their preferences) to find their own DM (messaging yourself).
 5. Click their name to open the DM.
 6. Get the current URL from the browser — it will look like `https://app.slack.com/client/TXXXXXXX/DXXXXXXX`.
-7. Save that URL to `slack_dm_url` in the preferences file (in the workspace folder).
+7. Save that URL to `slack_dm_url` in `$DATA_DIR/preferences.json`.
 8. Say: "Got it! I'll send your daily LinkedIn posts to that Slack DM."
 
 ### Step 3: Create the daily scheduled task
@@ -225,18 +230,10 @@ If the user says "turn off Slack" or "just show me inline", set `slack_dm_url` t
 ## Engagement workflow (Steps 1–10)
 
 ### 1. Load preferences
-Find and read preferences:
-```bash
-find /sessions/*/mnt -maxdepth 3 -name "spinwheel-linkedin-preferences.json" 2>/dev/null | head -1
-```
-If missing, run first-time setup above.
+Establish `DATA_DIR` (see Personal config files section), then read `$DATA_DIR/preferences.json`. If missing, run first-time setup above.
 
 ### 2. Load tracker
-Find and read tracker:
-```bash
-find /sessions/*/mnt -maxdepth 3 -name "spinwheel-linkedin-tracker.json" 2>/dev/null | head -1
-```
-If missing, create it with empty defaults in the workspace folder.
+Read `$DATA_DIR/tracker.json`. If missing, create it with empty defaults.
 
 ### 3. Collect posts — Spinwheel company page
 Navigate to: `https://www.linkedin.com/company/spinwheelapi/posts/?viewAsMember=true`
@@ -352,13 +349,13 @@ After each successful engagement, add the post URL to `engaged_post_ids` and upd
 ```
 You are running the daily Spinwheel LinkedIn engagement routine.
 
-1. Find preferences with: `find /sessions/*/mnt -maxdepth 3 -name "spinwheel-linkedin-preferences.json" 2>/dev/null | head -1` — read that file for name, tone, style, and slack_dm_url. Find tracker the same way (spinwheel-linkedin-tracker.json); create with empty defaults in the workspace folder if missing.
+1. Establish data directory: run `SKILL_DIR=$(find / -maxdepth 10 -type f -name "SKILL.md" -path "*/.claude/skills/linkedin-engage/SKILL.md" ! -path "*/worktrees/*" 2>/dev/null | head -1 | xargs dirname 2>/dev/null)`, then `WORKSPACE=$(dirname "$(dirname "$(dirname "$SKILL_DIR")")")` and `DATA_DIR="$WORKSPACE/.claude/linkedin-data"`. Read `$DATA_DIR/preferences.json` for name, tone, style, and slack_dm_url. Read `$DATA_DIR/tracker.json` for engagement history (create with empty defaults if missing).
 2. Open https://www.linkedin.com/company/spinwheelapi/posts/?viewAsMember=true in Chrome. Screenshot to confirm. If login wall appears, stop and notify user. Scroll to collect 1-5 recent posts — for each extract permalink URL (via "Copy link to post" from ... menu), full text, age, engagement counts, and source label "Spinwheel".
 3. Navigate to https://www.linkedin.com/in/theinnovativeone/recent-activity/all/ and collect 1-5 recent posts the same way, label each "Tomás". If the page fails to load, skip and note it.
 4. Merge all posts. Skip URLs already in engaged_post_ids. Skip posts older than 7 days. If nothing new, say so and stop.
 5. For each new post, draft a comment in the user's voice — specific to the post, never generic praise. For Spinwheel posts: write as a proud team member. For Tomás's posts: write as a supportive colleague engaging with his idea.
 6. If slack_dm_url is set: navigate to that URL in Chrome, click the message input, type a summary of all posts + proposed comments (format: header with count and A1/S2/E3 instructions, then one section per post with source label, excerpt, and proposed comment), press Enter to send. Tell the user in chat the Slack message was sent. If no slack_dm_url: present posts inline one at a time with options A/E/S/Q.
 7. Wait for user's approval choices in chat. On approval: navigate to post permalink, click Like, click comment field, type approved comment, click Post, screenshot to confirm.
-8. After each successful engagement, add post URL to engaged_post_ids and update last_checked in the tracker file (same path found in step 1).
+8. After each successful engagement, add post URL to engaged_post_ids and update last_checked in `$DATA_DIR/tracker.json`.
 9. Report: ✅ Engaged: X (Y Spinwheel, Z Tomás) · ⏭️ Skipped: N · 🔍 Already done: M
 ```
