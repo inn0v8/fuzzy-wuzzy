@@ -93,9 +93,9 @@ Make sure you're **logged into LinkedIn** in Chrome. If not, go to linkedin.com 
 {
   "name": "Your Name",
   "tone": "collegial and enthusiastic-but-professional",
-  "length": "1-3 sentences — short and genuine beats long and polished",
+  "length": "1-2 sentences — short and genuine beats long and polished",
   "emojis": "only if the post's energy clearly warrants it, never forced",
-  "style_notes": "Write like a proud team member on their lunch break. Respond to something specific in the post. Never generic praise like 'Amazing!' or 'Great post!'",
+  "style_notes": "Write like a proud team member on their lunch break. Respond to something specific in the post. Never generic praise like 'Amazing!' or 'Great post!'. Don't write the same comment as someone else",
   "example_comments": [
     "This is a huge milestone — congrats to everyone who pushed to make it happen.",
     "The loan payoff flow is such a game changer for users. Reducing that friction is exactly what this space needs.",
@@ -221,7 +221,7 @@ Navigate to: `https://www.linkedin.com/company/spinwheelapi/posts/?viewAsMember=
 
 Screenshot to confirm. If login wall appears, stop and ask user to log in first.
 
-Scroll to load 10–15 recent posts. For each, extract:
+Scroll to load 1–5 recent posts. For each, extract:
 - Full permalink URL (use "Copy link to post" from the `...` menu)
 - Full post text
 - Post age
@@ -233,7 +233,7 @@ Navigate to: `https://www.linkedin.com/in/theinnovativeone/recent-activity/all/`
 
 Screenshot to confirm the page loaded.
 
-Scroll to load 10–15 recent posts. For each, extract:
+Scroll to load 1–5 recent posts. For each, extract:
 - Full permalink URL
 - Full post text
 - Post age
@@ -243,7 +243,7 @@ Scroll to load 10–15 recent posts. For each, extract:
 If the page fails to load, skip this source and note it in the final summary.
 
 ### 5. Combine and filter
-Merge all collected posts into one list. Skip URLs already in `engaged_post_ids`. Skip posts older than 30 days (mention if any are skipped for this reason).
+Merge all collected posts into one list. Skip URLs already in `engaged_post_ids`. Skip posts older than 7 days (mention if any are skipped for this reason).
 
 If no new posts across all sources: say "Nothing new on Spinwheel's LinkedIn since last check." and stop.
 
@@ -331,9 +331,9 @@ After each successful engagement, add the post URL to `engaged_post_ids` and upd
 You are running the daily Spinwheel LinkedIn engagement routine.
 
 1. Read ~/spinwheel-linkedin-preferences.json for name, tone, style, and slack_dm_url. Read ~/spinwheel-linkedin-tracker.json for engagement history (create with empty defaults if missing).
-2. Open https://www.linkedin.com/company/spinwheelapi/posts/?viewAsMember=true in Chrome. Screenshot to confirm. If login wall appears, stop and notify user. Scroll to collect 10-15 recent posts — for each extract permalink URL (via "Copy link to post" from ... menu), full text, age, engagement counts, and source label "Spinwheel".
-3. Navigate to https://www.linkedin.com/in/theinnovativeone/recent-activity/all/ and collect 10-15 recent posts the same way, label each "Tomás". If the page fails to load, skip and note it.
-4. Merge all posts. Skip URLs already in engaged_post_ids. Skip posts older than 30 days. If nothing new, say so and stop.
+2. Open https://www.linkedin.com/company/spinwheelapi/posts/?viewAsMember=true in Chrome. Screenshot to confirm. If login wall appears, stop and notify user. Scroll to collect 1-5 recent posts — for each extract permalink URL (via "Copy link to post" from ... menu), full text, age, engagement counts, and source label "Spinwheel".
+3. Navigate to https://www.linkedin.com/in/theinnovativeone/recent-activity/all/ and collect 1-5 recent posts the same way, label each "Tomás". If the page fails to load, skip and note it.
+4. Merge all posts. Skip URLs already in engaged_post_ids. Skip posts older than 7 days. If nothing new, say so and stop.
 5. For each new post, draft a comment in the user's voice — specific to the post, never generic praise. For Spinwheel posts: write as a proud team member. For Tomás's posts: write as a supportive colleague engaging with his idea.
 6. If slack_dm_url is set: navigate to that URL in Chrome, click the message input, type a summary of all posts + proposed comments (format: header with count and A1/S2/E3 instructions, then one section per post with source label, excerpt, and proposed comment), press Enter to send. Tell the user in chat the Slack message was sent. If no slack_dm_url: present posts inline one at a time with options A/E/S/Q.
 7. Wait for user's approval choices in chat. On approval: navigate to post permalink, click Like, click comment field, type approved comment, click Post, screenshot to confirm.
