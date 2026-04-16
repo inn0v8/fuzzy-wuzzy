@@ -2,7 +2,7 @@
 name: linkedin-engage
 description: Monitor Spinwheel's LinkedIn company page AND the founder's personal profile for new posts, draft comments in your personal voice, and post them with one-tap approval. Use this skill whenever someone on the Spinwheel team wants to engage with company or founder LinkedIn posts, boost a post's reach, check what's been posted recently, or stay active on social — even if they just say "check LinkedIn", "like our posts", "comment on Spinwheel's feed", "engage with Tomas's posts", or "what did we post this week". Always trigger this skill for anything touching Spinwheel LinkedIn engagement, amplification, or social media activity.
 metadata:
-  version: "1.2.5"
+  version: "1.2.6"
   remote_url: "https://raw.githubusercontent.com/inn0v8/fuzzy-wuzzy/main/linkedin-engage/SKILL.md"
 ---
 
@@ -50,7 +50,7 @@ This skill runs automatically once a day at 4:00pm PT and can be triggered manua
 
 Before doing anything else, check for a newer version:
 
-1. Note the current version from this file's frontmatter: `version: "1.2.5"`
+1. Note the current version from this file's frontmatter: `version: "1.2.6"`
 2. Fetch the remote SKILL.md by running this bash command:
    ```bash
    curl -sf "https://raw.githubusercontent.com/inn0v8/fuzzy-wuzzy/main/linkedin-engage/SKILL.md"
@@ -118,11 +118,14 @@ All config files live in `$DATA_DIR`. If `SKILL_DIR` is empty, stop and tell the
     "The loan payoff flow is such a game changer for users. Reducing that friction is exactly what this space needs.",
     "Thrilled to be growing the team — if you're passionate about fintech infrastructure, Spinwheel is a great place to be."
   ],
-  "slack_dm_url": null
+  "slack_dm_url": null,
+  "slack_method": null
 }
 ```
 
-`slack_dm_url` is the URL to your Slack DM with yourself (e.g. `https://app.slack.com/client/T5FULLG74/DXXXXXXXXX`). See first-time setup for how to get it. Leave null to receive posts inline in chat instead.
+`slack_dm_url` is the URL to your Slack DM with yourself (e.g. `https://app.slack.com/client/T5FULLG74/DXXXXXXXXX`). Only needed for Chrome fallback — leave null to receive posts inline.
+
+`slack_method` is one of: `"mcp"` (Slack MCP), `"chrome"` (browser fallback), or `null` (inline in chat).
 
 ---
 
@@ -146,12 +149,16 @@ Create `$DATA_DIR/preferences.json` with their answers (or defaults if skipped).
 
 ### Step 2: Ask about Slack
 
-Say: "Want me to send you a Slack DM when new posts are ready to review? I'll open Slack in Chrome and message you directly — no setup required as long as you're logged into Slack. Just say yes or no."
+Say: "Want me to send you a Slack DM when new posts are ready to review? I can use the Slack MCP (cleanest, no Chrome needed) or fall back to Chrome if you prefer. Or skip it and I'll show everything inline here. What would you like?"
 
-If yes: run the Slack DM setup flow below to get and save their `slack_dm_url`.
-If no/skip: leave `slack_dm_url` null — the skill will present posts inline.
+**If they want Slack — try MCP first:**
+1. Check if a Slack MCP tool (e.g. `send_message` or `slack_send_message`) is available in the current tool list.
+2. If yes: ask for their Slack user ID or @name so you can DM them. Test by sending: "👋 Slack MCP connected! I'll DM you here when LinkedIn posts are ready." If the message sends successfully, save `slack_method: "mcp"` and `slack_dm_url: null` to preferences. Tell the user it worked.
+3. If MCP is unavailable or the test message fails: say "Slack MCP isn't connected — I can fall back to Chrome instead. Want me to try that?" If yes, run the Chrome Slack DM setup flow below and save `slack_method: "chrome"`. If no, save `slack_method: null` (inline).
 
-#### Slack DM setup flow
+**If they skip Slack:** save `slack_method: null` — the skill presents posts inline in chat.
+
+#### Chrome Slack DM setup flow (fallback only)
 
 1. Navigate to `https://app.slack.com` in Chrome. Screenshot to confirm they're logged in. If not, ask them to log in first.
 2. Navigate to `https://app.slack.com/client` — this opens their workspace.
@@ -159,8 +166,8 @@ If no/skip: leave `slack_dm_url` null — the skill will present posts inline.
 4. Type the user's name (from their preferences) to find their own DM (messaging yourself).
 5. Click their name to open the DM.
 6. Get the current URL from the browser — it will look like `https://app.slack.com/client/TXXXXXXX/DXXXXXXX`.
-7. Save that URL to `slack_dm_url` in `$DATA_DIR/preferences.json`.
-8. Say: "Got it! I'll send your daily LinkedIn posts to that Slack DM."
+7. Save that URL to `slack_dm_url` and `slack_method: "chrome"` in `$DATA_DIR/preferences.json`.
+8. Say: "Got it — I'll send your daily LinkedIn posts via Chrome."
 
 ### Step 3: Create the daily scheduled task
 
@@ -179,23 +186,11 @@ Then run the full engagement workflow (Steps 1–10 below) immediately.
 
 ---
 
-## Slack Notifications (Chrome-based)
+## Slack Notifications
 
-When `slack_dm_url` is set in preferences, send the posts summary as a Slack DM by navigating to that URL in Chrome.
+When `slack_method` is set in preferences, send the posts summary as a Slack DM. Use the method stored in preferences.
 
-### How to send the Slack message
-
-1. Navigate to the `slack_dm_url` in Chrome.
-2. Screenshot to confirm the DM is open. If Slack isn't loaded or logged in, stop and tell the user.
-3. Click the message input field at the bottom of the DM.
-4. Type the full notification message (see format below).
-5. Press Enter to send.
-6. Screenshot to confirm the message was sent.
-7. Tell the user in chat: "📬 Sent [N] new posts to your Slack DM for review. Reply here with your choices (A1, S2, E3: your text, etc.) or tell me directly in chat."
-
-### Message format
-
-Type this as a single message, using plain text (Slack will render the asterisks as bold):
+### Message format (same for all methods)
 
 ```
 📋 *Spinwheel LinkedIn — [N] new posts ready for your review*
@@ -209,21 +204,29 @@ Reply with: *A1* to approve, *S2* to skip, *E3: your text* to edit, or *skip all
 *Post 2* · [Tomás] · [X days ago]
 [first 150 chars of post text]...
 💬 Proposed: "[drafted comment]"
-
-[continue for all posts]
 ```
 
-Include the source label ([Spinwheel] or [Tomás]) so it's clear which page each post came from.
+After sending (any method), tell the user in chat: "📬 Sent [N] new posts to your Slack DM. Reply here with your choices (A1, S2, E3: your text, etc.)."
 
-After sending, wait for the user's response in chat. They can reply directly in chat (not Slack) — handle their choices the same way as inline approval.
+### Method: MCP (`slack_method: "mcp"`)
 
-### Updating Slack DM
+Use the available Slack MCP tool to send the message directly to the user's DM. If the send fails, tell the user and offer to fall back to Chrome or show inline.
 
-If the user says "update my Slack", "change my Slack DM", or similar — re-run the Slack DM setup flow above to get the new URL and save it.
+### Method: Chrome (`slack_method: "chrome"`)
 
-### Disabling Slack
+1. Navigate to `slack_dm_url` in Chrome.
+2. Screenshot to confirm the DM is open. If Slack isn't loaded or logged in, tell the user and fall back to inline.
+3. Click the message input field, type the full message, press Enter.
+4. Screenshot to confirm it sent.
 
-If the user says "turn off Slack" or "just show me inline", set `slack_dm_url` to null in their preferences file.
+### Method: Inline (`slack_method: null`)
+
+Present posts one at a time in chat with options A / E / S / Q.
+
+### Changing or disabling Slack
+
+- "update my Slack" / "change my Slack" → re-run Step 2 from first-time setup to reconfigure the method and save new preferences.
+- "turn off Slack" / "just show me inline" → set `slack_method: null` in preferences.
 
 ---
 
@@ -286,9 +289,9 @@ Post type guidance:
 
 ### 7. Present for approval
 
-**If `slack_dm_url` is set:** Send Slack DM (see Slack Notifications section above). Then wait for the user's choices in chat.
+**If `slack_method` is `"mcp"` or `"chrome"`:** Send Slack DM using that method (see Slack Notifications section above). Then wait for the user's choices in chat.
 
-**If no slack_dm_url:** Show each post inline one at a time:
+**If `slack_method` is null:** Show each post inline one at a time:
 
 ```
 📌 POST [N] · [Source] · [X days ago]
@@ -349,12 +352,12 @@ After each successful engagement, add the post URL to `engaged_post_ids` and upd
 ```
 You are running the daily Spinwheel LinkedIn engagement routine.
 
-1. Establish data directory: run `SKILL_DIR=$(find / -maxdepth 10 -type f -name "SKILL.md" -path "*/.claude/skills/linkedin-engage/SKILL.md" ! -path "*/worktrees/*" 2>/dev/null | head -1 | xargs dirname 2>/dev/null)`, then `WORKSPACE=$(dirname "$(dirname "$(dirname "$SKILL_DIR")")")` and `DATA_DIR="$WORKSPACE/.claude/linkedin-data"`. Read `$DATA_DIR/preferences.json` for name, tone, style, and slack_dm_url. Read `$DATA_DIR/tracker.json` for engagement history (create with empty defaults if missing).
+1. Establish data directory: run `SKILL_DIR=$(find / -maxdepth 10 -type f -name "SKILL.md" -path "*/.claude/skills/linkedin-engage/SKILL.md" ! -path "*/worktrees/*" 2>/dev/null | head -1 | xargs dirname 2>/dev/null)`, then `WORKSPACE=$(dirname "$(dirname "$(dirname "$SKILL_DIR")")")` and `DATA_DIR="$WORKSPACE/.claude/linkedin-data"`. Read `$DATA_DIR/preferences.json` for name, tone, style, slack_method, and slack_dm_url. Read `$DATA_DIR/tracker.json` for engagement history (create with empty defaults if missing).
 2. Open https://www.linkedin.com/company/spinwheelapi/posts/?viewAsMember=true in Chrome. Screenshot to confirm. If login wall appears, stop and notify user. Scroll to collect 1-5 recent posts — for each extract permalink URL (via "Copy link to post" from ... menu), full text, age, engagement counts, and source label "Spinwheel".
 3. Navigate to https://www.linkedin.com/in/theinnovativeone/recent-activity/all/ and collect 1-5 recent posts the same way, label each "Tomás". If the page fails to load, skip and note it.
 4. Merge all posts. Skip URLs already in engaged_post_ids. Skip posts older than 7 days. If nothing new, say so and stop.
 5. For each new post, draft a comment in the user's voice — specific to the post, never generic praise. For Spinwheel posts: write as a proud team member. For Tomás's posts: write as a supportive colleague engaging with his idea.
-6. If slack_dm_url is set: navigate to that URL in Chrome, click the message input, type a summary of all posts + proposed comments (format: header with count and A1/S2/E3 instructions, then one section per post with source label, excerpt, and proposed comment), press Enter to send. Tell the user in chat the Slack message was sent. If no slack_dm_url: present posts inline one at a time with options A/E/S/Q.
+6. Send notification based on slack_method: if "mcp" use the Slack MCP send_message tool to DM the user; if "chrome" navigate to slack_dm_url in Chrome and type/send the message; if null present posts inline one at a time with options A/E/S/Q. Format: header with count and A1/S2/E3 instructions, then one section per post with source label, excerpt, and proposed comment. If MCP or Chrome fails, fall back to inline and tell the user.
 7. Wait for user's approval choices in chat. On approval: navigate to post permalink, click Like, click comment field, type approved comment, click Post, screenshot to confirm.
 8. After each successful engagement, add post URL to engaged_post_ids and update last_checked in `$DATA_DIR/tracker.json`.
 9. Report: ✅ Engaged: X (Y Spinwheel, Z Tomás) · ⏭️ Skipped: N · 🔍 Already done: M
